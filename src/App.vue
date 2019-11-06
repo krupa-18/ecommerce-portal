@@ -1,6 +1,7 @@
 <template>
   <div id="app">
    <router-view></router-view>
+   
   </div>
 </template>
 
@@ -11,6 +12,7 @@
 
   const app = new Vue({
     router,
+   
   }).$mount('#app')
 </script>
 
@@ -21,6 +23,10 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+ 
+}
+
+.input-group--text-field input {
+  border-bottom: 1px solid black; 
 }
 </style>

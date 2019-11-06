@@ -5,47 +5,84 @@
              <button type="button" class= "button" v-on:click="searchsubmit(search)" >Search</button>
           <!-- </router-link>  -->
         
-         <ul v-bind:key="item.id" v-for="item in list">
-            <img v-if="item.image" :src="'../assests/' + item.image" >
-             {{ item.name }}
-             {{ item.price }}
-        </ul>    
-  
+         <!-- <ul v-bind:key="item.id" v-for="item in list"> -->
+        <ul v-bind:key="item.id" v-for="item in list">
+        <div align="center" style="cursor: pointer;padding:5;text-align=center;" @click="productdetailpage(item.id)">
+            <div style="width:31%;min-height:400px;float:left;position:relative;border:2px solid #ccc;margin:10px;">
+              <img v-if="item.image" :src="require(`@/assets/${item.image}`)" style="width:100%;height:350px;" />
+               <p> {{ item.name }}</p>
+               <p> {{ item.price }}</p>
+            </div>
+        </div>
+      </ul>    
+
 </div>
 </template>
 
 <script>
 import axios from 'axios';
- import router from '../router';
-  export default {
-     name: 'Search',
+import router from '../router';
+import Productdetail from './Productdetail';
+export default {
+    name: 'Search',
     data() {
-        return {
-            welcome: 'This is your profile',
+        return {    
             term: '',
             search: '',
-            list: []
+            list: [],
+            productid:'',
+            id: ''
+            
         }
     },
-    
+    components: {
+      Productdetail
+    },
     created() {
       this.search = this.term = this.$route.params.term;
     },
-    methods: 
-    {  
-      searchsubmit(search) {
-      axios.get('http://localhost:4000/search/' + search)
+      mounted()
+    {
+      axios.get('http://localhost:4000/search/' + this.search)
       .then((response) => {
         console.log(response.data);
         this.list = response.data;
-        
-      })
+      }).finally(() => this.loading = true)
       .catch((error) =>{
         console.log(error);
       });
+    },
+    methods: 
+    { 
+      productdetailpage (id) {    
+        this.productid = id;
+        console.log("productid:"+ this.product);
+          this.$router.push(
+            {
+              path: '/productdetail/'+id,
+              component: Productdetail,
+              props: true,
+              params: {
+                inputId: this.$router.id
+              }
+            })
+      },
+      searchsubmit(search) {
+        if (search == '') {
+          alert("please search by entering product names");
+        }
+        axios.get('http://localhost:4000/search/' + search)
+        .then((response) => {
+          console.log(response.data);
+          this.list = response.data;
+          
+        })
+        .catch((error) =>{
+          console.log(error);
+        });
       }
     }
-  }
+}
 </script>
 
 <style>

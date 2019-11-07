@@ -50,7 +50,7 @@ export default new VueRouter({
       component: Cart
     },
     {
-      path: '/place-order',
+      path: '/placeorder',
       name: 'Order',
       component: Order
     }

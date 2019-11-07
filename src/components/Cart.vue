@@ -1,4 +1,5 @@
 <template>
+<form v-on:submit.prevent="placeorder">
   <div class="container">
     <div class="jumbotron mt-5">
       <div class="col-sm-8 mx-auto">
@@ -18,11 +19,11 @@
           <tr>
             <td><img v-if="item.product_logo" :src="require(`@/assets/${item.product_logo}`)"/></td>
             <td>{{item.product_title }}</td>
-            <td>{{item.product_price}}</td>
+            <td>{{item.product_price * item.no_of_items }}</td>
             <td>
                 <!-- <button type="button" class="incbutton" @click="item.no_of_items += 1">+</button> -->
                  <h5>selected qty : {{item.no_of_items }}</h5>
-                 <input type="number" class="quantity"   :v-model="quantity" min="1">
+                 <input type="number" class="quantity" v-model="quantity" min="1">
                  <!-- <span v-if="item.no_of_items === 0"> {{ deletecart(item.id) }}</span> -->
                  
                 <button type="button" class="incbutton"  @click="updatecart(item.id)">update</button>                
@@ -35,16 +36,17 @@
         <tfoot>
           <tr>
             <th></th>
-            <th colspan="2" >Total Amount: {{ total }}</th>
+            <th colspan="2">Total Amount: {{total()}}</th>
             <th></th>
           </tr>
           <tr>
-            <td colspan="6" align="right"><button class="buybutton btn-success pull-right"  v-on:click="placeorder()">Proceed to Buy</button></td>
+            <td colspan="6" align="right"><button type="submit"  @click="checkout()" class="buybutton btn-success pull-right">Proceed to Buy</button></td>
           </tr>
         </tfoot>  
       </table>
     </div>
   </div>
+</form>
 </template>
 
 <script>
@@ -57,19 +59,12 @@ export default {
   data () {  
     return {
       cartdetails: {},
-      quantity: {}
+      quantity: ''
      }
   },
   
   computed: {
-    total() {
-      var amount = 0;
-      for(var i in this.cartdetails) {
-        amount += parseFloat(this.cartdetails[i].product_price);
-      }
-      //console.log("Total amount is :"+amount);
-      return amount;
-    },
+    
     // items() {
     //   var item = 0;
     //   for(var i in this.cartdetails) {
@@ -77,10 +72,23 @@ export default {
     //   }
     //   return item;
     // }
-  
   }, 
-  methods: { 
-
+  methods: {
+    total() {
+      var amount = 0;
+      for(var i in this.cartdetails) {
+        amount = amount + parseFloat(this.cartdetails[i].product_price);
+      }
+      //console.log("Total amount is :"+amount);
+      return amount;
+    }, 
+    checkout() {
+      this.$router.push(
+        {
+          path: '/placeorder',
+          component: Order
+        });
+    },
     getCartDetails() { 
       var token = localStorage.getItem('usertoken');
       axios.get('http://localhost:4000/carts/getcartitemsbyuserid',
@@ -106,10 +114,6 @@ export default {
       }); 
     },
     updatecart(cartid) {
-
-      if(this.quantity === ''){
-        alert("please enter the quantity");
-      } else {
         console.log(cartid+" "+this.quantity);
         var token = localStorage.getItem('usertoken');
         axios.put('http://localhost:4000/carts/updatecart/'+ cartid,
@@ -124,14 +128,12 @@ export default {
         .catch((error) =>{
           console.log(error);
         }); 
-      }
     },
-    placeorder() {
-      router.push({ name: 'Order'});
-    }
+  
   },
   mounted:  function () { 
     this.getCartDetails();
+    this.total();
   },
   //   mounted(){
   //      quantity  = this.item.no_of_items
